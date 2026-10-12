@@ -466,8 +466,12 @@ async def start_dummy_web_server(port: int):
 
 async def main():
     if not config.BOT_TOKEN:
-        print("❌ XATOLIK: BOT_TOKEN ko'rsatilmagan! .env faylida BOT_TOKEN ni belgilang.")
-        return
+        error_msg = "❌ XATOLIK: BOT_TOKEN topilmadi! Railway Variables bo'limida BOT_TOKEN ni tekshiring."
+        print(error_msg, flush=True)
+        logger.error(error_msg)
+        raise ValueError(error_msg)
+
+    print(f"✅ BOT_TOKEN topildi: {config.BOT_TOKEN[:10]}...", flush=True)
 
     # Bulutli platforma (Railway/Render) PORT berganda web serverni yoqish
     port_env = os.getenv("PORT")
