@@ -448,10 +448,34 @@ async def ai_text_message_handler(message: Message, state: FSMContext):
 
 # ================= ASOSIY ISHGA TUSHIRISH =================
 
+import os
+from aiohttp import web
+
+async def start_dummy_web_server(port: int):
+    """Bulutli serverlar (Railway/Render) port talab qilganda javob beruvchi yengil server"""
+    app = web.Application()
+    async def handle_ping(request):
+        return web.Response(text="Bot is running!")
+    app.router.add_get("/", handle_ping)
+    app.router.add_get("/health", handle_ping)
+    runner = web.AppRunner(app)
+    await runner.setup()
+    site = web.TCPSite(runner, "0.0.0.0", port)
+    await site.start()
+    print(f"✅ Web health-check server ishga tushdi: port {port}")
+
 async def main():
     if not config.BOT_TOKEN:
         print("❌ XATOLIK: BOT_TOKEN ko'rsatilmagan! .env faylida BOT_TOKEN ni belgilang.")
         return
+
+    # Bulutli platforma (Railway/Render) PORT berganda web serverni yoqish
+    port_env = os.getenv("PORT")
+    if port_env:
+        try:
+            await start_dummy_web_server(int(port_env))
+        except Exception as e:
+            print(f"Web server xatosi: {e}")
 
     # Bazani ishga tushirish
     await db.init_db()
